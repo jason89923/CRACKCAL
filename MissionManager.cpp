@@ -50,7 +50,7 @@ class MissionManager {
         }  // try
         catch (const exception& e) {
             const char* msg = e.what();
-            char errorMsg[strlen(msg) + 1];
+            char errorMsg[500];
             strcpy(errorMsg, msg);
             MessageBox(NULL, strcat(errorMsg, "\n\rPlease recopy to fix the problem"), "Error", MB_OK | MB_ICONERROR);
         }  // catch
