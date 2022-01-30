@@ -20,11 +20,6 @@ class KeyboardListener {
                         MissionManager::start();
                     }  // if
                 }      // if
-                else if (((PKBDLLHOOKSTRUCT)lParam)->vkCode == 122) {
-                    if ((wParam == WM_KEYDOWN) || (wParam == WM_SYSKEYDOWN)) {
-                        MissionManager::pause();
-                    }  // if
-                }      // else if
                 else if (((PKBDLLHOOKSTRUCT)lParam)->vkCode == 123) {
                     if ((wParam == WM_KEYDOWN) || (wParam == WM_SYSKEYDOWN)) {
                         MissionManager::stop();

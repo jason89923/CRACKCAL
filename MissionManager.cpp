@@ -21,6 +21,9 @@ class MissionManager {
         if (!processing) {
             processing = true;
         }  // if
+        else {
+            pause();
+        } // else
     }
 
     static void stop() {
@@ -46,7 +49,7 @@ class MissionManager {
             io << text;
         }  // try
         catch (exception& e) {
-            printf(e.what());
+            MessageBox(NULL, strcat((char*)e.what(), "\n\rPlease restart the program to fix the problem"), "Error", MB_OK | MB_ICONERROR);
         }  // catch
     }
 };
