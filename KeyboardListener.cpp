@@ -14,17 +14,15 @@ class KeyboardListener {
    private:
     static LRESULT CALLBACK keyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
         if (nCode == HC_ACTION) {
-            if ((wParam == WM_KEYDOWN) || (wParam == WM_SYSKEYDOWN) || (wParam == WM_KEYUP) || (wParam == WM_SYSKEYUP)) {
+            if ((wParam == WM_KEYDOWN) || (wParam == WM_SYSKEYDOWN)) {
                 if (((PKBDLLHOOKSTRUCT)lParam)->vkCode == 121) {
-                    if ((wParam == WM_KEYDOWN) || (wParam == WM_SYSKEYDOWN)) {
-                        MissionManager::start();
-                    }  // if
-                }      // if
+                    MissionManager::start();
+                    return 1;
+                }  // if
                 else if (((PKBDLLHOOKSTRUCT)lParam)->vkCode == 123) {
-                    if ((wParam == WM_KEYDOWN) || (wParam == WM_SYSKEYDOWN)) {
-                        MissionManager::stop();
-                    }  // if
-                }      // else if
+                    MissionManager::stop();
+                    return 1;
+                }  // else if
             }
         }
         return CallNextHookEx(NULL, nCode, wParam, lParam);

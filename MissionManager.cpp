@@ -48,8 +48,11 @@ class MissionManager {
             io >> text;
             io << text;
         }  // try
-        catch (exception& e) {
-            MessageBox(NULL, strcat((char*)e.what(), "\n\rPlease restart the program to fix the problem"), "Error", MB_OK | MB_ICONERROR);
+        catch (const exception& e) {
+            const char* msg = e.what();
+            char errorMsg[strlen(msg) + 1];
+            strcpy(errorMsg, msg);
+            MessageBox(NULL, strcat(errorMsg, "\n\rPlease recopy to fix the problem"), "Error", MB_OK | MB_ICONERROR);
         }  // catch
     }
 };
