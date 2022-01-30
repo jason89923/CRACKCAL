@@ -10,7 +10,7 @@ using namespace std;
 class INITClipboard {
    public:
     INITClipboard() {
-        if (!OpenClipboard(nullptr))
+        if (!OpenClipboard(NULL))
             throw runtime_error("Can't open clipboard.");
     }
 
@@ -51,7 +51,7 @@ class ClipboardGetter {
         INITClipboard clipboard;
 
         HANDLE hData = GetClipboardData(CF_TEXT);
-        if (hData == nullptr)
+        if (hData == NULL)
             throw runtime_error("Can't get clipboard text.");
 
         INITTextGlobalLock textGlobalLock = hData;
