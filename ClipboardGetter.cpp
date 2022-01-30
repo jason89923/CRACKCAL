@@ -1,9 +1,8 @@
-#include <stdlib.h>
-#include <string.h>
+#ifndef ClipboardGetterPage
+#define ClipboardGetterPage
 #include <windows.h>
+#include <string.h>
 
-#include <exception>
-#include <iostream>
 #include <stdexcept>
 using namespace std;
 
@@ -27,16 +26,16 @@ class INITClipboard {
 class INITTextGlobalLock {
    public:
     INITTextGlobalLock(HANDLE& hData) : m_hData(hData) {
-        str = static_cast<const char*>(GlobalLock(m_hData));
-        if (!str)
+        const char* string = static_cast<const char*>(GlobalLock(m_hData));
+        if (!string)
             throw runtime_error("Can't acquire lock on clipboard text.");
-    }
-
-    ~INITTextGlobalLock() {
+        else
+            str = new char[strlen(string) + 1];
+            strcpy((char*)str, string);
         GlobalUnlock(m_hData);
     }
 
-    const char* Get() const {
+    const char* get() const {
         return str;
     }
 
@@ -55,7 +54,7 @@ class ClipboardGetter {
             throw runtime_error("Can't get clipboard text.");
 
         INITTextGlobalLock textGlobalLock = hData;
-        text = textGlobalLock.Get();
+        text = textGlobalLock.get();
     }
 
     const char* getText() const {
@@ -65,3 +64,4 @@ class ClipboardGetter {
    private:
     const char* text;
 };
+#endif

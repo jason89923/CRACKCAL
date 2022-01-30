@@ -1,8 +1,8 @@
+#ifndef KeyboardSimulatorPage
+#define KeyboardSimulatorPage
 #include <windows.h>
 
 #include <map>
-
-#include "ClipboardGetter.cpp"
 
 class KeyInfo {
    public:
@@ -119,10 +119,4 @@ class KeyboardSimulator {
     }
 };
 
-void SetKeyBoard(int num) {
-    HWND hCon = GetConsoleWindow();
-    DWORD dwNewKeybLayout = num;  // Layout must be already loaded!
-    PostMessage(hCon, WM_INPUTLANGCHANGEREQUEST, 0, (LPARAM)dwNewKeybLayout);
-    PostMessage(hCon, WM_INPUTLANGCHANGE, 0, (LPARAM)dwNewKeybLayout);
-}  // SetKeyBoard
-
+#endif
