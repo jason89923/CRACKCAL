@@ -76,10 +76,18 @@ class KeyboardSimulator {
     keyMap keyMap;
 
    public:
-    void input(const char* text) {
+    void input(const char* text, bool* force_stop, bool* pause) {
         for (int i = 0; text[i] != '\0'; i++) {
-            input(text[i]);
-            Sleep(1);
+            if (!*force_stop) {
+                if (*pause) {
+                    Sleep(10);
+                    i--;
+                }  // if
+                else {
+                    input(text[i]);
+                    Sleep(1);
+                }  // else
+            }
         }
     }
 

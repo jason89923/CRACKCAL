@@ -20,9 +20,19 @@ class IO {
     /*以模擬鍵盤輸出內容*/
     friend IO& operator<<(IO& io, const char* text) {
         KeyboardSimulator keyboardSimulator;
-        keyboardSimulator.input(text);
+        keyboardSimulator.input(text, &force_stop, &pause);
+        force_stop = false;
+        pause = false;
         return io;
     }
+
+   private:
+    static bool force_stop;
+    static bool pause;
+    friend class MissionManager;
 };
+
+bool IO::force_stop = false;
+bool IO::pause = false;
 
 #endif

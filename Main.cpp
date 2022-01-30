@@ -1,9 +1,7 @@
-#include "KeyboardSimulator.cpp"
-
+#include "MissionManager.cpp"
+#include "KeyboardListener.cpp"
 
 int main() {
-    KeyboardSimulator keyboardSimulator;
-    ClipboardGetter clipboardGetter;
-    Sleep(3000);
-    keyboardSimulator.input(clipboardGetter.getText());
+    KeyboardListener keyboardListener;
+    MissionManager missionManager;
 }
