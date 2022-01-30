@@ -52,7 +52,7 @@ class MissionManager {
             const char* msg = e.what();
             char errorMsg[500];
             strcpy(errorMsg, msg);
-            MessageBox(NULL, strcat(errorMsg, "\n\rPlease recopy to fix the problem"), "Error", MB_OK | MB_ICONERROR);
+            MessageBox(NULL, strcat(errorMsg, "\n\rPlease recopy to fix the problem"), "Error", MB_OK | MB_ICONERROR | MB_SYSTEMMODAL);
         }  // catch
     }
 };
