@@ -32,7 +32,11 @@ class INITTextGlobalLock {
         else
             str = new char[strlen(string) + 1];
             strcpy((char*)str, string);
+    }
+
+    ~INITTextGlobalLock() {
         GlobalUnlock(m_hData);
+        GlobalFree(m_hData);
     }
 
     const char* get() const {
