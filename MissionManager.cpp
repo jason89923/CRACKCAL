@@ -47,7 +47,7 @@ class MissionManager {
             char* text = NULL;
             io >> text;
             io << text;
-            delete text;
+            delete[] text;
         }  // try
         catch (const exception& e) {
             const char* msg = e.what();
