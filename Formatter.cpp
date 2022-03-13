@@ -2,13 +2,15 @@
 #define FormatterPage
 
 #include <stdio.h>
+#include <time.h>
 
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <time.h>
+#include <stack>
 
 #include "IO.cpp"
 
@@ -57,8 +59,43 @@ class SingleDelimiter : public Delimiter {
 class DoubleDelimiter : public Delimiter {
    public:
     DoubleDelimiter() {
-        vector<string> delimiters = {"+=", "-=", "*=", "/=", "%=", "^=", "&=", "|=", "<<", ">>", "==", "!=", "<=", ">=", "&&", "||", "++", "--", "->"};
+        vector<string> delimiters = {"+=", "-=", "*=", "/=", "%=", "^=", "&=", "|=", "<<", ">>", "==", "!=", "<=", ">=", "&&", "||", "++", "--", "->", "::", "//", "/*", "*/"};
         Delimiter::build(delimiters);
+    }
+};
+
+class Token {
+   public:
+    string token;
+    Token(string& token) {
+        this->token = token;
+    }
+
+    Token(const char* token) {
+        this->token = token;
+    }
+
+    Token& operator=(string& token) {
+        this->token = token;
+        return *this;
+    }
+
+    Token& operator=(const char* token) {
+        this->token = string(token);
+        return *this;
+    }
+
+    bool operator==(string str) {
+        return token == str;
+    }
+
+    bool operator!=(string str) {
+        return token != str;
+    }
+
+    friend ostream& operator<<(ostream& out, const Token& token) {
+        out << token.token;
+        return out;
     }
 };
 
@@ -67,7 +104,7 @@ class Formatter {
     static SingleDelimiter singleDelimiter;
     static DoubleDelimiter doubleDelimiter;
 
-    void getToken(char* text, vector<string>& tokenList) {
+    void getToken(char* text, vector<Token>& tokenList) {
         tokenList.clear();
         string buffer;
         bool isReadingString = false, isReadingChar = false, escapeCharacter = false;
@@ -76,6 +113,10 @@ class Formatter {
                 if (buffer.length() > 0) {
                     tokenList.push_back(buffer);
                     buffer.clear();
+                }
+
+                if (text[i] == '\n') {
+                    tokenList.push_back("\n");
                 }
             } else if (!isReadingChar && !isReadingString && singleDelimiter.contains(text[i])) {
                 if (buffer.length() > 0) {
@@ -127,25 +168,198 @@ class Formatter {
         }
     }
 
-    void mergeToken(vector<string>& tokenList) {
+    void mergeToken(vector<Token>& tokenList) {
+        bool include = false;
         for (int i = 0; i < tokenList.size() - 1; i++) {
-            string currentCombination = tokenList[i] + tokenList[i + 1];
+            string currentCombination = tokenList[i].token + tokenList[i + 1].token;
             if (doubleDelimiter.contains(currentCombination)) {
                 tokenList[i] = currentCombination;
                 tokenList.erase(tokenList.begin() + i + 1);
             }
+
+            if (tokenList[i] == "else" && tokenList[i + 1] == "if") {
+                tokenList[i] = "else if";
+                tokenList.erase(tokenList.begin() + i + 1);
+            }
+
+            if (tokenList[i] == "\n") {
+                include = false;
+            } else if (tokenList[i] == "#") {
+                include = true;
+            }
+
+            if (include && tokenList[i] == "<") {
+                string inclusion;
+                while (i < tokenList.size()) {
+                    string currentToken = tokenList[i].token;
+                    inclusion += currentToken;
+                    tokenList.erase(tokenList.begin() + i);
+                    if (currentToken == ">") {
+                        break;
+                    }
+                }
+
+                tokenList.insert(tokenList.begin() + i, inclusion);
+            }
         }
     }
 
+    bool whetherToAddWhiteSpace(Token& token1, Token& token2) {
+        if (token2 == "(") {
+            if (token1 == "if" || token1 == "else if"|| token1 == "while" || token1 == "for" || token1 == "&&" || token1 == "||") {
+                return true;
+            }
+            return false;
+        }
+
+        if (token1 == "(" && token2 == ")") {
+            return false;
+        }
+
+        if (token1 == "!") {
+            return false;
+        }
+
+        if (token2 == "[" || token2 == "++" || token2 == "--") {
+            return false;
+        }
+
+        if (token1 != "." && token2 != ".") {
+            return true;
+        }
+
+        return false;
+    }
+
+    void singleLine(vector<Token>& line) {
+        if (line[0] == "}") {
+            levelCounter--;
+        }
+
+        for (int i = 0; i < levelCounter; i++) {
+            ss << "  ";
+        }
+
+        if (autoSpace) {
+            ss << "  ";
+            autoSpace = false;
+            commentStack.pop_back();
+        }
+
+        if ((line[0] == "if" || line[0] == "while" || line[0] == "for") && line[line.size() - 1] != "{") {
+            autoSpace = true;
+        }
+
+        for (int i = 0; i < line.size() - 1; i++) {
+            ss << line[i];
+            if (whetherToAddWhiteSpace(line[i], line[i + 1])) {
+                ss << " ";
+            }
+        }
+
+        ss << line[line.size() - 1];
+        if (line[0] == "}" && commentStack.size() > 0) {
+            ss << " // " << commentStack[commentStack.size() - 1];
+            commentStack.pop_back();
+        }
+        ss << "\n";
+
+        if (line[line.size() - 1] == "{") {
+            levelCounter++;
+        }
+
+        if (line[0] == "if" || line[0] == "while" || line[0] == "for" || line[0] == "else" || line[0] == "else if") {
+            commentStack.push_back(line[0]);
+        }
+    }
+
+    void separateLine(vector<Token>& tokenList) {
+        for (int i = 0; i < tokenList.size() - 1; i++) {
+            if (tokenList[i] == "}") {
+                if (tokenList[i + 1] == "else" || tokenList[i + 1] == "else if") {
+                    tokenList.insert(tokenList.begin() + i + 1, "\n");
+                }
+            }
+        }
+    }
+
+    void reshape(vector<Token>& tokenList) {
+        vector<Token> line;
+        for (int i = 0; i < tokenList.size(); i++) {
+            if (tokenList[i] != "\n") {
+                line.push_back(tokenList[i]);
+            } else {
+                if (line.size() == 0) {
+                    ss << "\n";
+                } else {
+                    singleLine(line);
+                    line.clear();
+                }
+            }
+        }
+
+        if (line.size() > 0) {
+            singleLine(line);
+        }
+    }
+
+    void deleteComment(vector<Token>& tokenList) {
+        bool deleteSingleLineComment = false;
+        bool deleteMultiLineComment = false;
+        for (int i = 0; i < tokenList.size(); i++) {
+            if (!deleteSingleLineComment && !deleteMultiLineComment) {
+                if (tokenList[i] == "//") {
+                    deleteSingleLineComment = true;
+                } else if (tokenList[i] == "/*") {
+                    deleteMultiLineComment = true;
+                }
+            }
+
+            if (tokenList[i] == "\n") {
+                deleteSingleLineComment = false;
+            } else if (tokenList[i] == "*/") {
+                deleteMultiLineComment = false;
+                tokenList.erase(tokenList.begin() + i);
+                i--;
+            }
+
+            if (deleteSingleLineComment || deleteMultiLineComment) {
+                tokenList.erase(tokenList.begin() + i);
+                i--;
+            }
+        }
+    }
+
+    void addLine(vector<Token>& tokenList) {
+        for (int i = 0; i < tokenList.size() - 2; i++) {
+            if (tokenList[i] == "}" && tokenList[i + 1] == "\n" && (tokenList[i + 2] != "}" && tokenList[i + 2] != "\n" && tokenList[i + 2] != "else" && tokenList[i + 2] != "else if")) {
+                tokenList.insert(tokenList.begin() + i + 1, "\n");
+            }
+        }
+    }
+
+    stringstream ss;
+    int levelCounter;
+    bool autoSpace = false;
+    vector<Token> commentStack;
+
    public:
     Formatter(char* text) {
+        ss.clear();
+        commentStack.clear();
+        levelCounter = 0;
+        autoSpace = false;
         time_t t = clock();
-        vector<string> tokenList;
-        this->getToken(text, tokenList);
-        this->mergeToken(tokenList);
-        for (int i = 0; i < tokenList.size(); i++) {
-            cout << tokenList[i] << endl;
-        }
+        vector<Token> tokenList;
+        getToken(text, tokenList);
+        mergeToken(tokenList);
+        separateLine(tokenList);
+        deleteComment(tokenList);
+        addLine(tokenList);
+        reshape(tokenList);
+
+        fstream file("output.cpp", ios::out);
+        file << ss.str();
 
         cout << clock() - t << endl;
     }
