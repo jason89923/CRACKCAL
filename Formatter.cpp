@@ -115,7 +115,7 @@ class Formatter {
                     buffer.clear();
                 }
 
-                if (text[i] == '\n') {
+                if (text[i] == '\n' && tokenList[tokenList.size() - 1] != "\n") {
                     tokenList.push_back("\n");
                 }
             } else if (!isReadingChar && !isReadingString && singleDelimiter.contains(text[i])) {
@@ -336,9 +336,6 @@ class Formatter {
                 tokenList.insert(tokenList.begin() + i + 1, "\n");
             } else if ((tokenList[i] == ")" && tokenList[i + 1] == "\n" && tokenList[i + 2] == "{") || (tokenList[i] == "else" && tokenList[i + 1] == "\n" && tokenList[i + 2] == "{")) {
                 tokenList.erase(tokenList.begin() + i + 1);
-            } else if (tokenList[i] == "\n" && tokenList[i + 1] == "\n") {
-                tokenList.erase(tokenList.begin() + i);
-                i--;
             }
         }
     }
