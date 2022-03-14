@@ -334,10 +334,11 @@ class Formatter {
         for (int i = 0; i < tokenList.size() - 2; i++) {
             if (tokenList[i] == "}" && tokenList[i + 1] == "\n" && (tokenList[i + 2] != "}" && tokenList[i + 2] != "\n" && tokenList[i + 2] != "else" && tokenList[i + 2] != "else if")) {
                 tokenList.insert(tokenList.begin() + i + 1, "\n");
-            }
-
-            if ((tokenList[i] == ")" && tokenList[i + 1] == "\n" && tokenList[i + 2] == "{") || (tokenList[i] == "else" && tokenList[i + 1] == "\n" && tokenList[i + 2] == "{")) {
+            } else if ((tokenList[i] == ")" && tokenList[i + 1] == "\n" && tokenList[i + 2] == "{") || (tokenList[i] == "else" && tokenList[i + 1] == "\n" && tokenList[i + 2] == "{")) {
                 tokenList.erase(tokenList.begin() + i + 1);
+            } else if (tokenList[i] == "\n" && tokenList[i + 1] == "\n" && (tokenList[i + 2] == "else" || tokenList[i + 2] == "else if")) {
+                tokenList.erase(tokenList.begin() + i);
+                i--;
             }
         }
     }
