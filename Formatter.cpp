@@ -239,7 +239,7 @@ class Formatter {
         vector<string> necessityTokens = {"(", ")", "{"};
         int functionNameIndex = -10;
 
-        for (int i = 0; i < line.size() ; i++) {
+        for (int i = 0; i < line.size(); i++) {
             if (necessityTokens.size() > 0) {
                 if (line[i] == necessityTokens[0]) {
                     necessityTokens.erase(necessityTokens.begin());
@@ -301,6 +301,8 @@ class Formatter {
 
         if (line[0] == "if" || line[0] == "while" || line[0] == "for" || line[0] == "else" || line[0] == "else if" || line[0] == "try" || line[0] == "catch") {
             commentStack.push_back(line[0]);
+        } else if (line[0] == "class" || line[0] == "struct" || line[0] == "enum" && line.size() > 1) {
+            commentStack.push_back(line[1]);
         } else {
             string functionName = isFuctionDefinition(line);
             if (functionName != "-1") {
@@ -375,8 +377,12 @@ class Formatter {
                 i--;
             }
 
-            if (tokenList[i] == "class" || tokenList[i] == "struct" || tokenList[i] == "enum" || tokenList[i] == "using") {
+            if (tokenList[i] == "class" || tokenList[i] == "struct" || tokenList[i] == "typedef" || tokenList[i] == "enum" || tokenList[i] == "using") {
                 tokenList.insert(tokenList.begin() + i, "\n");
+                i++;
+            }
+
+            if (tokenList[i] == "typedef" && tokenList[i + 1] == "struct") {
                 i++;
             }
         }
