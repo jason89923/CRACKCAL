@@ -336,7 +336,7 @@ class Formatter {
                 tokenList.insert(tokenList.begin() + i + 1, "\n");
             }
 
-            if (tokenList[i] == ")" && tokenList[i + 1] == "\n" && tokenList[i + 2] == "{") {
+            if ((tokenList[i] == ")" && tokenList[i + 1] == "\n" && tokenList[i + 2] == "{") || (tokenList[i] == "else" && tokenList[i + 1] == "\n" && tokenList[i + 2] == "{")) {
                 tokenList.erase(tokenList.begin() + i + 1);
             }
         }
