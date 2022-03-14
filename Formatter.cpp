@@ -206,7 +206,7 @@ class Formatter {
 
     bool whetherToAddWhiteSpace(Token& token1, Token& token2) {
         if (token2 == "(") {
-            if (token1 == "if" || token1 == "else if" || token1 == "while" || token1 == "for" || token1 == "&&" || token1 == "||" || token1 == "(") {
+            if (token1 == "if" || token1 == "else if" || token1 == "while" || token1 == "for" || token1 == "&&" || token1 == "||" || token1 == "(" || token1 == "throw") {
                 return true;
             }
             return false;
@@ -251,7 +251,7 @@ class Formatter {
             }
         }
 
-        if (necessityTokens.size() == 0 && functionNameIndex > 0) {
+        if (necessityTokens.size() == 0 && functionNameIndex >= 0) {
             return line[functionNameIndex].token + "()";
         }
 
@@ -302,7 +302,8 @@ class Formatter {
         if (line[0] == "if" || line[0] == "while" || line[0] == "for" || line[0] == "else" || line[0] == "else if" || line[0] == "try" || line[0] == "catch") {
             commentStack.push_back(line[0]);
         } else if (line[0] == "class" || line[0] == "struct" || line[0] == "enum" && line.size() > 1) {
-            commentStack.push_back(line[1]);
+            string comment = line[0].token + " " + line[1].token;
+            commentStack.push_back(comment);
         } else {
             string functionName = isFuctionDefinition(line);
             if (functionName != "-1") {
