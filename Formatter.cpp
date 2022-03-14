@@ -374,6 +374,11 @@ class Formatter {
                 tokenList.erase(tokenList.begin() + i);
                 i--;
             }
+
+            if (tokenList[i] == "class" || tokenList[i] == "struct" || tokenList[i] == "enum" || tokenList[i] == "using") {
+                tokenList.insert(tokenList.begin() + i, "\n");
+                i++;
+            }
         }
     }
 
