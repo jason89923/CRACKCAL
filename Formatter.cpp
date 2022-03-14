@@ -8,9 +8,9 @@
 #include <iostream>
 #include <map>
 #include <sstream>
+#include <stack>
 #include <string>
 #include <vector>
-#include <stack>
 
 #include "IO.cpp"
 
@@ -206,7 +206,7 @@ class Formatter {
 
     bool whetherToAddWhiteSpace(Token& token1, Token& token2) {
         if (token2 == "(") {
-            if (token1 == "if" || token1 == "else if"|| token1 == "while" || token1 == "for" || token1 == "&&" || token1 == "||") {
+            if (token1 == "if" || token1 == "else if" || token1 == "while" || token1 == "for" || token1 == "&&" || token1 == "||") {
                 return true;
             }
             return false;
@@ -220,7 +220,7 @@ class Formatter {
             return false;
         }
 
-        if (token2 == "[" || token2 == "++" || token2 == "--") {
+        if (token2 == "[" || token2 == "," || token2 == "++" || token2 == "--") {
             return false;
         }
 
@@ -334,6 +334,10 @@ class Formatter {
         for (int i = 0; i < tokenList.size() - 2; i++) {
             if (tokenList[i] == "}" && tokenList[i + 1] == "\n" && (tokenList[i + 2] != "}" && tokenList[i + 2] != "\n" && tokenList[i + 2] != "else" && tokenList[i + 2] != "else if")) {
                 tokenList.insert(tokenList.begin() + i + 1, "\n");
+            }
+
+            if (tokenList[i] == ")" && tokenList[i + 1] == "\n" && tokenList[i + 2] == "{") {
+                tokenList.erase(tokenList.begin() + i + 1);
             }
         }
     }
