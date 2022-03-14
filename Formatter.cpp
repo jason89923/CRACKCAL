@@ -252,7 +252,7 @@ class Formatter {
         }
 
         if (necessityTokens.size() == 0 && functionNameIndex > 0) {
-            return line[functionNameIndex].token;
+            return line[functionNameIndex].token + "()";
         }
 
         return "-1";
