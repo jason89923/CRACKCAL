@@ -206,7 +206,7 @@ class Formatter {
 
     bool whetherToAddWhiteSpace(Token& token1, Token& token2) {
         if (token2 == "(") {
-            if (token1 == "if" || token1 == "else if" || token1 == "while" || token1 == "for" || token1 == "&&" || token1 == "||") {
+            if (token1 == "if" || token1 == "else if" || token1 == "while" || token1 == "for" || token1 == "&&" || token1 == "||" || token1 == "(") {
                 return true;
             }
             return false;
@@ -290,6 +290,10 @@ class Formatter {
             commentStack.pop_back();
         }
         ss << "\n";
+
+        if (line[0] == "}" && line[line.size() - 1] == ";") {
+            ss << "\n";
+        }
 
         if (line[line.size() - 1] == "{") {
             levelCounter++;
