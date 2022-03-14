@@ -204,7 +204,14 @@ class Formatter {
         }
     }
 
-    bool whetherToAddWhiteSpace(Token& token1, Token& token2) {
+    bool whetherToAddWhiteSpace(Token& token1, Token& token2, vector<Token>& line) {
+        if (line.size() == 2) {
+            if (token1 == "}" && token2 == ";") {
+                return false;
+            }
+        }
+
+
         if (token2 == "(") {
             if (token1 == "if" || token1 == "else if" || token1 == "while" || token1 == "for" || token1 == "&&" || token1 == "||" || token1 == "(" || token1 == "throw") {
                 return true;
@@ -213,6 +220,10 @@ class Formatter {
         }
 
         if (token1 == "(" && token2 == ")") {
+            return false;
+        }
+
+        if (token1 == "::" || token2 == "::") {
             return false;
         }
 
@@ -283,7 +294,7 @@ class Formatter {
 
         for (int i = 0; i < line.size() - 1; i++) {
             ss << line[i];
-            if (whetherToAddWhiteSpace(line[i], line[i + 1])) {
+            if (whetherToAddWhiteSpace(line[i], line[i + 1], line)) {
                 ss << " ";
             }
         }
