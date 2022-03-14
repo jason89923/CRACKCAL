@@ -338,7 +338,7 @@ class Formatter {
                 tokenList.erase(tokenList.begin() + i + 1);
             } else if (tokenList[i] == "\n" && tokenList[i + 1] == "\n" && (tokenList[i + 2] == "else" || tokenList[i + 2] == "else if")) {
                 tokenList.erase(tokenList.begin() + i);
-                i--;
+                i -= 2;
             }
         }
     }
