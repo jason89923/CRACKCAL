@@ -273,7 +273,7 @@ class Formatter {
             commentStack.pop_back();
         }
 
-        if ((line[0] == "if" || line[0] == "while" || line[0] == "for") && line[line.size() - 1] != "{") {
+        if ((line[0] == "if" || line[0] == "else if" || line[0] == "else" || line[0] == "while" || line[0] == "for") && line[line.size() - 1] != "{") {
             autoSpace = true;
         }
 
@@ -295,7 +295,7 @@ class Formatter {
             levelCounter++;
         }
 
-        if (line[0] == "if" || line[0] == "while" || line[0] == "for" || line[0] == "else" || line[0] == "else if") {
+        if (line[0] == "if" || line[0] == "while" || line[0] == "for" || line[0] == "else" || line[0] == "else if" || line[0] == "try" || line[0] == "catch") {
             commentStack.push_back(line[0]);
         } else {
             string functionName = isFuctionDefinition(line);
@@ -366,8 +366,9 @@ class Formatter {
         for (int i = 0; i < tokenList.size() - 2; i++) {
             if (tokenList[i] == "}" && tokenList[i + 1] == "\n" && (tokenList[i + 2] != "}" && tokenList[i + 2] != "\n" && tokenList[i + 2] != "else" && tokenList[i + 2] != "else if")) {
                 tokenList.insert(tokenList.begin() + i + 1, "\n");
-            } else if ((tokenList[i] == ")" && tokenList[i + 1] == "\n" && tokenList[i + 2] == "{") || (tokenList[i] == "else" && tokenList[i + 1] == "\n" && tokenList[i + 2] == "{")) {
-                tokenList.erase(tokenList.begin() + i + 1);
+            } else if ((tokenList[i] == "\n" && tokenList[i + 1] == "{")) {
+                tokenList.erase(tokenList.begin() + i);
+                i--;
             }
         }
     }
