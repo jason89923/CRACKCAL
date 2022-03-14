@@ -264,7 +264,7 @@ class Formatter {
 
         if (necessityTokens.size() == 0 && functionNameIndex >= 0) {
             if (line[functionNameIndex].token == "main") {
-                return "please recheck your code !!";
+                return "function main(), please recheck your code again !";
             }
 
             return line[functionNameIndex].token + "()";
