@@ -231,6 +231,33 @@ class Formatter {
         return false;
     }
 
+    string isFuctionDefinition(vector<Token>& line) {
+        if (line.size() < 4) {
+            return "-1";
+        }
+
+        vector<string> necessityTokens = {"(", ")", "{"};
+        int functionNameIndex = -10;
+
+        for (int i = 0; i < line.size() ; i++) {
+            if (necessityTokens.size() > 0) {
+                if (line[i] == necessityTokens[0]) {
+                    necessityTokens.erase(necessityTokens.begin());
+                }
+
+                if (line[i] == "(" && functionNameIndex == -10) {
+                    functionNameIndex = i - 1;
+                }
+            }
+        }
+
+        if (necessityTokens.size() == 0 && functionNameIndex > 0) {
+            return line[functionNameIndex].token;
+        }
+
+        return "-1";
+    }
+
     void singleLine(vector<Token>& line) {
         if (line[0] == "}") {
             levelCounter--;
@@ -270,6 +297,11 @@ class Formatter {
 
         if (line[0] == "if" || line[0] == "while" || line[0] == "for" || line[0] == "else" || line[0] == "else if") {
             commentStack.push_back(line[0]);
+        } else {
+            string functionName = isFuctionDefinition(line);
+            if (functionName != "-1") {
+                commentStack.push_back(functionName);
+            }
         }
     }
 
