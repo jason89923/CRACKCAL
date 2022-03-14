@@ -393,7 +393,7 @@ class Formatter {
                 i--;
             }
 
-            if (tokenList[i] == "class" || tokenList[i] == "struct" || tokenList[i] == "typedef" || tokenList[i] == "enum" || tokenList[i] == "using") {
+            if (tokenList[i] == "class" || tokenList[i] == "struct" || tokenList[i] == "typedef" || tokenList[i] == "enum" || tokenList[i] == "using" || tokenList[i] == "public" || tokenList[i] == "protected" || tokenList[i] == "private") {
                 tokenList.insert(tokenList.begin() + i, "\n");
                 i++;
             }
