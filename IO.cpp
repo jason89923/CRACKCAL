@@ -26,6 +26,12 @@ class IO {
         return io;
     }
 
+    /*寫入剪貼簿*/
+    friend IO& operator<<(IO& io, string text) {
+        ClipboardSetter clipboardSetter = text;
+        return io;
+    }
+
    private:
     static bool force_stop;
     static bool pause;

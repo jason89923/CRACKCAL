@@ -3,6 +3,7 @@
 
 #include <windows.h>
 
+#include "Formatter.cpp"
 #include "IO.cpp"
 
 class MissionManager {
@@ -23,7 +24,7 @@ class MissionManager {
         }  // if
         else {
             pause();
-        } // else
+        }  // else
     }
 
     static void stop() {
@@ -38,26 +39,50 @@ class MissionManager {
         }  // if
     }
 
+    static void formatAndWriteIntoClipboard() {
+        string result = format();
+        if (result != "") {
+            io << result;
+        }
+    }
+
    private:
-    IO io;
+    static IO io;
     static bool processing;
 
-    void run() {
+    static string format() {
+        char* text = NULL;
         try {
-            char* text = NULL;
             io >> text;
-            io << text;
-            delete[] text;
-        }  // try
-        catch (const exception& e) {
+            Formatter formatter = text;
+            return formatter.str();
+        } catch (const exception& e) {
             const char* msg = e.what();
             char errorMsg[500];
             strcpy(errorMsg, msg);
-            MessageBox(NULL, strcat(errorMsg, "\n\rPlease recopy to fix the problem"), "Error", MB_OK | MB_ICONERROR | MB_SYSTEMMODAL);
-        }  // catch
+            //MessageBox(NULL, strcat(errorMsg, "\n\rPlease recopy to fix the problem"), "Error", MB_OK | MB_ICONERROR | MB_SYSTEMMODAL);
+        }
+
+        if (text != NULL) {
+            delete[] text;
+        }
+
+        return "";
+    }
+
+    void run() {
+        try {
+            string result = format();
+            if (result != "") {
+                io << result.c_str();
+            }
+        } catch (const exception& e) {
+            
+        }
     }
 };
 
 bool MissionManager::processing = false;
+IO MissionManager::io;
 
 #endif

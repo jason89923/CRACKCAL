@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <time.h>
 
-#include <fstream>
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -210,7 +209,6 @@ class Formatter {
                 return false;
             }
         }
-
 
         if (token2 == "(") {
             if (token1 == "if" || token1 == "else if" || token1 == "while" || token1 == "for" || token1 == "&&" || token1 == "||" || token1 == "(" || token1 == "throw") {
@@ -423,23 +421,18 @@ class Formatter {
         deleteComment(tokenList);
         addLine(tokenList);
         reshape(tokenList);
+    }
 
-        fstream file("output.cpp", ios::out);
-        file << ss.str();
+    string str() {
+        return ss.str();
+    }
 
-        cout << clock() - t << endl;
+    friend IO& operator<<(IO& io, const Formatter& formatter) {
+        io << formatter.ss.str();
+        return io;
     }
 };
 
 SingleDelimiter Formatter::singleDelimiter;
 DoubleDelimiter Formatter::doubleDelimiter;
-
-IO io;
-
-int main() {
-    char* text;
-    io >> text;
-    Formatter formatter = text;
-    return 0;
-}
 #endif

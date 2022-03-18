@@ -12,6 +12,8 @@ class KeyboardListener {
     }
 
    private:
+    static bool hotKey; 
+
     static LRESULT CALLBACK keyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
         if (nCode == HC_ACTION) {
             if ((wParam == WM_KEYDOWN) || (wParam == WM_SYSKEYDOWN)) {
@@ -22,6 +24,20 @@ class KeyboardListener {
                 else if (((PKBDLLHOOKSTRUCT)lParam)->vkCode == 123) {
                     MissionManager::stop();
                     return 1;
+                }  // else if
+                else if (((PKBDLLHOOKSTRUCT)lParam)->vkCode == 162) {
+                    hotKey = true;
+                }  // else if
+                else if (((PKBDLLHOOKSTRUCT)lParam)->vkCode == 86) {
+                    if (hotKey) {
+
+                    MissionManager::formatAndWriteIntoClipboard();
+                }  // else if
+                    }
+            }
+            else if ((wParam == WM_KEYUP) || (wParam == WM_SYSKEYUP)) {
+                if (((PKBDLLHOOKSTRUCT)lParam)->vkCode == 162) {
+                    hotKey = false;
                 }  // else if
             }
         }
@@ -41,5 +57,7 @@ class KeyboardListener {
         return 0;
     }
 };
+
+bool KeyboardListener::hotKey = false;
 
 #endif
