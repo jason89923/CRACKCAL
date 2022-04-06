@@ -216,7 +216,7 @@ class Formatter {
         }
 
         if (token2 == "(") {
-            if (token1 == "if" || token1 == "else if" || token1 == "while" || token1 == "for" || token1 == "&&" || token1 == "||" || token1 == "(" || token1 == "throw" || token1 == "+" || token1 == "-" || token1 == "*" || token1 == "/" || token1 == "return" || token1 == ")" || token1 == "<<" || token1 == ">>") {
+            if (token1 == "if" || token1 == "else if" || token1 == "while" || token1 == "for" || token1 == "&&" || token1 == "||" || token1 == "(" || token1 == "throw" || token1 == "+" || token1 == "-" || token1 == "*" || token1 == "/" || token1 == ">" || token1 == ">=" || token1 == "<" || token1 == "<=" || token1 == "==" || token1 == "!=" || token1 == "=" || token1 == "return" || token1 == ")" || token1 == "<<" || token1 == ">>") {
                 return true;
             }
             return false;
