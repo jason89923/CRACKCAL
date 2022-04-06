@@ -104,6 +104,7 @@ class Formatter {
     static DoubleDelimiter doubleDelimiter;
 
     void getToken(char* text, vector<Token>& tokenList) {
+        int initLevel = 0;
         tokenList.clear();
         string buffer;
         bool isReadingString = false, isReadingChar = false, escapeCharacter = false;
@@ -114,9 +115,12 @@ class Formatter {
                     buffer.clear();
                 }
 
-                if (text[i] == '\n' && tokenList[tokenList.size() - 1] != "\n") {
-                    tokenList.push_back("\n");
+                if (tokenList.size() >= 1) {
+                    if (text[i] == '\n' && tokenList[tokenList.size() - 1] != "\n") {
+                        tokenList.push_back("\n");
+                    }
                 }
+
             } else if (!isReadingChar && !isReadingString && singleDelimiter.contains(text[i])) {
                 if (buffer.length() > 0) {
                     tokenList.push_back(buffer);
@@ -169,7 +173,8 @@ class Formatter {
 
     void mergeToken(vector<Token>& tokenList) {
         bool include = false;
-        for (int i = 0; i < tokenList.size() - 1; i++) {
+        int size = tokenList.size();
+        for (int i = 0; i < size - 1; i++) {
             string currentCombination = tokenList[i].token + tokenList[i + 1].token;
             if (doubleDelimiter.contains(currentCombination)) {
                 tokenList[i] = currentCombination;
@@ -211,7 +216,7 @@ class Formatter {
         }
 
         if (token2 == "(") {
-            if (token1 == "if" || token1 == "else if" || token1 == "while" || token1 == "for" || token1 == "&&" || token1 == "||" || token1 == "(" || token1 == "throw") {
+            if (token1 == "if" || token1 == "else if" || token1 == "while" || token1 == "for" || token1 == "&&" || token1 == "||" || token1 == "(" || token1 == "throw" || token1 == "+" || token1 == "-" || token1 == "*" || token1 == "/" || token1 == "return" || token1 == ")" || token1 == "<<" || token1 == ">>") {
                 return true;
             }
             return false;
@@ -261,17 +266,45 @@ class Formatter {
         }
 
         if (necessityTokens.size() == 0 && functionNameIndex >= 0) {
-            if (line[functionNameIndex].token == "main") {
-                return "function main(), please recheck your code again !";
-            }
-
             return line[functionNameIndex].token + "()";
         }
 
         return "-1";
     }
 
-    void singleLine(vector<Token>& line) {
+    void pushComment(vector<Token>& line, int currentLevel) {
+        if (line[0] == "if" || line[0] == "while" || line[0] == "for" || line[0] == "else" || line[0] == "else if" || line[0] == "try" || line[0] == "catch") {
+            commentStack.push_back(line[0]);
+        } else if (line[0] == "class" || line[0] == "struct" || line[0] == "enum" && line.size() > 1) {
+            string comment = line[0].token + " " + line[1].token;
+            commentStack.push_back(comment);
+        } else {
+            string functionName = isFuctionDefinition(line);
+            if (functionName != "-1" && currentLevel == 0) {
+                commentStack.push_back(functionName);
+            }
+        }
+    }
+
+    void popComment(vector<Token>& line) {
+        if (autoSpace) {
+            ss << "\n  ";
+            autoSpace = false;
+            if (!commentStack.empty())
+                commentStack.pop_back();
+        } else {
+            if (line[0] == "}" && commentStack.size() > 0) {
+                ss << " // " << commentStack[commentStack.size() - 1];
+                commentStack.pop_back();
+            }
+
+            ss << "\n";
+        }
+    }
+
+    void singleLine(vector<Token>& line, int& currentLevel) {
+        pushComment(line, currentLevel);
+        levelCount(line, currentLevel);
         if (line[0] == "}") {
             levelCounter--;
         }
@@ -280,14 +313,14 @@ class Formatter {
             ss << "  ";
         }
 
-        if (autoSpace) {
-            ss << "  ";
-            autoSpace = false;
-            commentStack.pop_back();
+        if ((line[0] == "if" || line[0] == "else if" || line[0] == "else" || line[0] == "while" || line[0] == "for")) {
+            waitingEndPair = true;
         }
 
-        if ((line[0] == "if" || line[0] == "else if" || line[0] == "else" || line[0] == "while" || line[0] == "for") && line[line.size() - 1] != "{") {
-            autoSpace = true;
+        if (waitingEndPair && currentLevel == 0) {
+            waitingEndPair = false;
+            if (line[line.size() - 1] != "{")
+                autoSpace = true;
         }
 
         for (int i = 0; i < line.size() - 1; i++) {
@@ -298,11 +331,13 @@ class Formatter {
         }
 
         ss << line[line.size() - 1];
-        if (line[0] == "}" && commentStack.size() > 0) {
-            ss << " // " << commentStack[commentStack.size() - 1];
-            commentStack.pop_back();
+        popComment(line);
+
+        if (currentLevel != 0 && !commentStack.empty()) {
+            for (int i = 0; i < commentStack[commentStack.size() - 1].token.length() + 3; i++) {
+                ss << " ";
+            }
         }
-        ss << "\n";
 
         if (line[0] == "}" && line[line.size() - 1] == ";") {
             ss << "\n";
@@ -311,31 +346,33 @@ class Formatter {
         if (line[line.size() - 1] == "{") {
             levelCounter++;
         }
+    }
 
-        if (line[0] == "if" || line[0] == "while" || line[0] == "for" || line[0] == "else" || line[0] == "else if" || line[0] == "try" || line[0] == "catch") {
-            commentStack.push_back(line[0]);
-        } else if (line[0] == "class" || line[0] == "struct" || line[0] == "enum" && line.size() > 1) {
-            string comment = line[0].token + " " + line[1].token;
-            commentStack.push_back(comment);
-        } else {
-            string functionName = isFuctionDefinition(line);
-            if (functionName != "-1") {
-                commentStack.push_back(functionName);
+    void levelCount(vector<Token>& tokenList, int& cuttentLevel) {
+        for (int i = 0; i < tokenList.size(); i++) {
+            if (tokenList[i] == "(") {
+                cuttentLevel++;
+            } else if (tokenList[i] == ")") {
+                cuttentLevel--;
             }
         }
     }
 
     void separateLine(vector<Token>& tokenList) {
-        for (int i = 0; i < tokenList.size() - 1; i++) {
+        int size = tokenList.size();
+        for (int i = 0; i < size; i++) {
             if (tokenList[i] == "}") {
-                if (tokenList[i + 1] == "else" || tokenList[i + 1] == "else if") {
+                if (tokenList[i + 1] == "else" || tokenList[i + 1] == "else if" || tokenList[i + 1] == "catch") {
                     tokenList.insert(tokenList.begin() + i + 1, "\n");
                 }
+            } else if (tokenList[i] == "{" && tokenList[i + 1] == "}") {
+                tokenList.insert(tokenList.begin() + i + 1, "\n");
             }
         }
     }
 
     void reshape(vector<Token>& tokenList) {
+        int currentLevel = 0;
         vector<Token> line;
         for (int i = 0; i < tokenList.size(); i++) {
             if (tokenList[i] != "\n") {
@@ -344,14 +381,14 @@ class Formatter {
                 if (line.size() == 0) {
                     ss << "\n";
                 } else {
-                    singleLine(line);
+                    singleLine(line, currentLevel);
                     line.clear();
                 }
             }
         }
 
         if (line.size() > 0) {
-            singleLine(line);
+            singleLine(line, currentLevel);
         }
     }
 
@@ -383,8 +420,9 @@ class Formatter {
     }
 
     void addLine(vector<Token>& tokenList) {
-        for (int i = 0; i < tokenList.size() - 2; i++) {
-            if (tokenList[i] == "}" && tokenList[i + 1] == "\n" && (tokenList[i + 2] != "}" && tokenList[i + 2] != "\n" && tokenList[i + 2] != "else" && tokenList[i + 2] != "else if")) {
+        int size = tokenList.size();
+        for (int i = 0; i < size - 2; i++) {
+            if (tokenList[i] == "}" && tokenList[i + 1] == "\n" && (tokenList[i + 2] != "}" && tokenList[i + 2] != "\n" && tokenList[i + 2] != "else" && tokenList[i + 2] != "else if" && tokenList[i + 2] != "catch")) {
                 tokenList.insert(tokenList.begin() + i + 1, "\n");
             } else if ((tokenList[i] == "\n" && tokenList[i + 1] == "{")) {
                 tokenList.erase(tokenList.begin() + i);
@@ -405,6 +443,7 @@ class Formatter {
     stringstream ss;
     int levelCounter;
     bool autoSpace = false;
+    bool waitingEndPair = false;
     vector<Token> commentStack;
 
    public:
